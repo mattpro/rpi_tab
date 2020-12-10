@@ -17,12 +17,12 @@ from luma.core.render import canvas
 #Do SPI0 podłączony jest wyświetlacz z pływajacym tekstem + zegar
 serial0 = spi(port=0, device=0, gpio=noop())
 device0 = max7219(serial0, cascaded= 8, block_orientation=90,
-				 rotate=0, blocks_arranged_in_reverse_order=True)
+				 rotate=2, blocks_arranged_in_reverse_order=True)
 
 #Do SPI1 podłączony jest wyświetlacz z licznikiem zgonów i dni bez wypadku 
 serial1 = spi(port=0, device=1, gpio=noop())
 device1 = max7219(serial1, cascaded= 8, block_orientation=90,
-				 rotate=0, blocks_arranged_in_reverse_order=True)
+				 rotate=2, blocks_arranged_in_reverse_order=True)
 
 				 
 def printDieCountAndDaysWithoutDie(dieCount, daysWithoutDie):
@@ -31,10 +31,10 @@ def printDieCountAndDaysWithoutDie(dieCount, daysWithoutDie):
 
 
 def printDateAndTime(dateTime):
-	#current_time = now.strftime("%d.%m%H:%M:%S")
-	current_time = dateTime.strftime("%H:%M:%S")
+	#current_time = now.strftime("%d.%m.%y  %H:%M:%S")
+	current_time = dateTime.strftime("   %H:%M:%S  ")
 	with canvas(device0) as draw:
-		text(draw, (32, 0), current_time + ' ' + str(daysWithoutDie) , fill="white", font=proportional(LCD_FONT))	
+		text(draw, (0, 0), current_time + ' ' + str(daysWithoutDie) , fill="white", font=proportional(LCD_FONT))	
 
 def printCustomMessage(message):
 	show_message(device0, message, fill="white", font=proportional(LCD_FONT), scroll_delay=0.05)
@@ -49,7 +49,7 @@ def playBarka():
 	while pygame.mixer.music.get_busy() == True:
 		pass
 	
-newMessageFlag = True
+newMessageFlag = False
 	
 daysWithoutDie = 287
 dieCount = 0;
