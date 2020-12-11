@@ -25,16 +25,16 @@ device1 = max7219(serial1, cascaded= 8, block_orientation=90,
 				 rotate=2, blocks_arranged_in_reverse_order=True)
 
 				 
-def printDieCountAndDaysWithoutDie(dieCount, daysWithoutDie):
-    with canvas(device1) as draw:
-        text(draw, (32, 0), str(dieCount) + ' ' + str(daysWithoutDie) , fill="white", font=proportional(CP437_FONT))				 
+def printDaysWithoutDie(daysWithoutDie, recorDaysWithoutDie ):
+	with canvas(device1) as draw:
+		text(draw, (0, 0), "%5d  %5d" % (daysWithoutDie, recorDaysWithoutDie), fill="white", font=proportional(LCD_FONT))
 
 
 def printDateAndTime(dateTime):
 	#current_time = now.strftime("%d.%m.%y  %H:%M:%S")
 	current_time = dateTime.strftime("   %H:%M:%S  ")
 	with canvas(device0) as draw:
-		text(draw, (0, 0), current_time + ' ' + str(daysWithoutDie) , fill="white", font=proportional(LCD_FONT))	
+		text(draw, (0, 0), current_time, fill="white", font=proportional(LCD_FONT))	
 
 def printCustomMessage(message):
 	show_message(device0, message, fill="white", font=proportional(LCD_FONT), scroll_delay=0.05)
@@ -51,20 +51,21 @@ def playBarka():
 	
 newMessageFlag = False
 	
-daysWithoutDie = 287
-dieCount = 0;
+
+
+#COMPANY_START = datetime.date(2019, 5, 1)
+
+
 
 #playBarka()
 
 				 
 while 1:
-	#Print die conut and days without die
-	#printDieCountAndDaysWithoutDie(dieCount, daysWithoutDie)	
-	#daysWithoutDie = daysWithoutDie + 1	
 	now = datetime.now()
 	current_time = now.strftime("%d.%m.%Y %H:%M:%S")
 	print(current_time)
-	
+	printDaysWithoutDie(678, 897)
+	time.sleep(0.5)
 	#if now.hour = 21 and now.min = 37:
 	if now.hour == 23 and now.min == 25:
 		playBarka()
@@ -75,12 +76,7 @@ while 1:
 	else:
 		printDateAndTime(now)
 	
-	
-	
-	
-	
-
-	time.sleep(1)
+	time.sleep(0.5)
 				
 
 
