@@ -29,7 +29,7 @@ def create_app(configfile=None):
         menu_text_saved = default_menu
         form = MenuForm()
         if form.validate_on_submit():  # to get error messages to the browser
-            menu_text = ', '.join(form.todays_menu.data.strip().split())
+            menu_text = ', '.join(form.todays_menu.data.splitlines())
             if (len(menu_text) < 1):
                 flash('Za krotki tekst!', 'error')
             else:
