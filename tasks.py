@@ -48,21 +48,22 @@ newMessageFlag = False
 class LEDDisplay:
     def __init__(self) -> None:
         super().__init__()
-        self.shown_text = None
+        self.shown_text = 'EMPTY'
 
     def tasks_change_text(self, new_text):
         self.shown_text = new_text
         
     def threaded_rest(self,):
-        now = datetime.now()
-        current_time = now.strftime("%d.%m.%Y %H:%M:%S")
-        print(current_time)
-        printDaysWithoutDie(678, 897)
-        time.sleep(0.5)
-        #if now.hour = 21 and now.min = 37:
-        printCustomMessage(self.shown_text)
-        if now.hour == 23 and now.min == 25:
-            playBarka()
-            printCustomMessage("Pokolenie JP2")
-        
-        time.sleep(0.5)
+        while True:
+            now = datetime.now()
+            current_time = now.strftime("%d.%m.%Y %H:%M:%S")
+            print(current_time)
+            printDaysWithoutDie(678, 897)
+            time.sleep(0.5)
+            #if now.hour = 21 and now.min = 37:
+            printCustomMessage(self.shown_text)
+            if now.hour == 23 and now.min == 25:
+                playBarka()
+                printCustomMessage("Pokolenie JP2")
+            
+            time.sleep(0.5)
