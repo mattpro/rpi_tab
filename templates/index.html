@@ -6,14 +6,8 @@
 {% block content %}
 {{util.flashed_messages(dismissible=True)}}
 <title>Tablica Conclusive Engineering</title>
-<style>
-body{
-        background-image: url("{{ url_for('static', filename='urzel.png') }}");
-        background-attachment: fixed;
-    }
-</style>
 
-<div class="container">
+<div class="container" id="main-elem">
   <h1>Tablica Conclusive Engineering</h1>
 
   <h2>Menu obiadowe:</h2>
@@ -25,4 +19,19 @@ body{
 {% block head %}
 {{super()}}
 {{fixes.ie8()}}
+<style>
+  body{
+          background-image: url("{{ url_for('static', filename='orzel.png') }}");
+          background-attachment: fixed;
+      }
+  #main-elem {
+    background-color: beige;
+    z-index: 0;
+    opacity: 0.95;
+    border-radius: 15px 50px;
+    display: flex;
+    flex-flow: column;
+    min-height: 320px;
+  }
+  </style>
 {% endblock %}

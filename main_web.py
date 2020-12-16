@@ -15,7 +15,7 @@ class MenuForm(FlaskForm):
     submit_button = SubmitField(u'Wyślij na tablice')
 
 def create_app(configfile=None):
-    default_menu = 'aaa'
+    default_menu = '^_^'
     app = Flask(__name__)
     Bootstrap(app)
     app.config['SECRET_KEY'] = 'devkey'
