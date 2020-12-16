@@ -5,6 +5,14 @@
 
 {% block content %}
 {{util.flashed_messages(dismissible=True)}}
+<title>Tablica Conclusive Engineering</title>
+<style>
+body{
+        background-image: url("{{ url_for('static', filename='urzel.png') }}");
+        background-attachment: fixed;
+    }
+</style>
+
 <div class="container">
   <h1>Tablica Conclusive Engineering</h1>
 

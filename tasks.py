@@ -8,6 +8,9 @@ from luma.core.legacy import text
 from luma.core.legacy.font import proportional, CP437_FONT, LCD_FONT, SEG7_FONT, SINCLAIR_FONT, TINY_FONT, UKR_FONT
 from luma.core.render import canvas
 
+
+conclusiveStart = datetime(year = 2019, month = 5, day = 1, hour = 0, minute = 0, second = 0)
+
 #Do SPI0 podłączony jest wyświetlacz z pływajacym tekstem + zegar
 serial0 = spi(port=0, device=0, gpio=noop())
 device0 = max7219(serial0, cascaded= 8, block_orientation=90,
@@ -18,7 +21,7 @@ serial1 = spi(port=0, device=1, gpio=noop())
 device1 = max7219(serial1, cascaded= 8, block_orientation=90,
 				 rotate=2, blocks_arranged_in_reverse_order=True)
 
-				 
+			 
 def printDaysWithoutDie(daysWithoutDie, recorDaysWithoutDie ):
 	with canvas(device1) as draw:
 		text(draw, (0, 0), "%5d  %5d" % (daysWithoutDie, recorDaysWithoutDie), fill="white", font=proportional(LCD_FONT))
@@ -35,14 +38,14 @@ def printCustomMessage(message):
 	
 
 def playBarka():
-	pygame.mixer.init()
-	pygame.mixer.music.load("barka.mp3")
-	pygame.mixer.music.set_volume(1.0)
-	pygame.mixer.music.play()
+    if pygame.mixer.music.get_busy() == False:
+        pygame.mixer.init()
+        pygame.mixer.music.load("barka.mp3")
+        pygame.mixer.music.set_volume(1.0)
+        pygame.mixer.music.play()
 
-	while pygame.mixer.music.get_busy() == True:
-		pass
-	
+
+
 
 
 class LEDDisplay:
@@ -58,12 +61,12 @@ class LEDDisplay:
     def threaded_rest(self,):
         while True:
             now = datetime.now()
-
-            printDaysWithoutDie(678, 897)
+            detltaT = now - conclusiveStart
+            printDaysWithoutDie(detltaT.days, detltaT.days)
             time.sleep(0.5)
-         
+                      
             #if now.hour = 21 and now.min = 37:
-            if now.hour == 23 and now.min == 25:
+            if now.hour == 13 and now.min == 46:
                 playBarka()
                 printCustomMessage("Pokolenie JP2")
             elif self.newMessageFlag  == True:
