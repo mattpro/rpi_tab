@@ -26,7 +26,7 @@ def printDaysWithoutDie(daysWithoutDie, recorDaysWithoutDie ):
 
 def printDateAndTime(dateTime):
 	#current_time = now.strftime("%d.%m.%y  %H:%M:%S")
-	current_time = dateTime.strftime("   %H:%M:%S  ")
+	current_time = dateTime.strftime("    %H:%M:%S  ")
 	with canvas(device0) as draw:
 		text(draw, (0, 0), current_time, fill="white", font=proportional(LCD_FONT))	
 
@@ -43,27 +43,34 @@ def playBarka():
 	while pygame.mixer.music.get_busy() == True:
 		pass
 	
-newMessageFlag = False
+
 
 class LEDDisplay:
     def __init__(self) -> None:
         super().__init__()
         self.shown_text = 'EMPTY'
+        self.newMessageFlag = False
 
     def tasks_change_text(self, new_text):
         self.shown_text = new_text
+        self.newMessageFlag = True
         
     def threaded_rest(self,):
         while True:
             now = datetime.now()
-            current_time = now.strftime("%d.%m.%Y %H:%M:%S")
-            print(current_time)
+
             printDaysWithoutDie(678, 897)
             time.sleep(0.5)
+         
             #if now.hour = 21 and now.min = 37:
-            printCustomMessage(self.shown_text)
             if now.hour == 23 and now.min == 25:
                 playBarka()
                 printCustomMessage("Pokolenie JP2")
+            elif self.newMessageFlag  == True:
+                self.newMessageFlag  = False
+                printCustomMessage(self.shown_text)
+            else:
+                printDateAndTime(now)
+
             
             time.sleep(0.5)
