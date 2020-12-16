@@ -5,6 +5,6 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 URUCHAMIANIE
-export FLASK_APP=main_web.py 
-flask run
-
+source venv/bin/activate
+export FLASK_APP=main_web.py
+flask run --host=0.0.0.0
