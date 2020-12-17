@@ -7,7 +7,7 @@ from luma.core.legacy import show_message
 from luma.core.legacy import text
 from luma.core.legacy.font import proportional, CP437_FONT, LCD_FONT, SEG7_FONT, SINCLAIR_FONT, TINY_FONT, UKR_FONT
 from luma.core.render import canvas
-
+import simpleaudio as sa
 
 conclusiveStart = datetime(year = 2019, month = 5, day = 1, hour = 0, minute = 0, second = 0)
 
@@ -44,6 +44,10 @@ def playBarka():
         pygame.mixer.music.set_volume(1.0)
         pygame.mixer.music.play()
 
+def playBarka2():	
+	wave_obj = sa.WaveObject.from_wave_file("barka.wav")
+	play_obj = wave_obj.play()
+	#play_obj.wait_done()
 
 
 
@@ -53,6 +57,7 @@ class LEDDisplay:
         super().__init__()
         self.shown_text = 'EMPTY'
         self.newMessageFlag = False
+        self.playSound = False
 
     def tasks_change_text(self, new_text):
         self.shown_text = new_text
@@ -65,15 +70,18 @@ class LEDDisplay:
             printDaysWithoutDie(detltaT.days, detltaT.days)
             time.sleep(0.5)
                       
-            #if now.hour = 21 and now.min = 37:
-            if now.hour == 13 and now.min == 46:
-                playBarka()
-                printCustomMessage("Pokolenie JP2")
+            if now.hour == 21 and now.minute == 37:
+                if self.playSound == False:
+                    self.playSound = True
+                    playBarka2()
+                printCustomMessage("Pokolenie JP2")        
             elif self.newMessageFlag  == True:
                 self.newMessageFlag  = False
                 printCustomMessage(self.shown_text)
             else:
                 printDateAndTime(now)
 
-            
+            if now.hour == 10 and now.minute == 14:
+                self.playSound = False
+                
             time.sleep(0.5)

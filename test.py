@@ -52,15 +52,23 @@ def playBarka():
 newMessageFlag = False
 	
 
+import simpleaudio as sa
+
+def playBarka2():	
+	wave_obj = sa.WaveObject.from_wave_file("barka.wav")
+	play_obj = wave_obj.play()
+	play_obj.wait_done()
+
+
 
 #COMPANY_START = datetime.date(2019, 5, 1)
 
 
 
 #playBarka()
-
+playBarka2()
 				 
-while 1:
+while 0:
 	now = datetime.now()
 	current_time = now.strftime("%d.%m.%Y %H:%M:%S")
 	print(current_time)
