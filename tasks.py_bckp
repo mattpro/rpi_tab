@@ -21,18 +21,7 @@ serial1 = spi(port=0, device=1, gpio=noop())
 device1 = max7219(serial1, cascaded= 8, block_orientation=90,
 				 rotate=2, blocks_arranged_in_reverse_order=True)
 
-
-def replacePolishCharacters(string):
-    string=string.replace("ł", "l").replace("Ł", "L").replace("ś", "s").replace("Ś", "S")
-    string=string.replace("ć", "c").replace("Ć", "C").replace("ą", "a").replace("Ą", "A")
-    string=string.replace("ę", "e").replace("Ę", "E").replace("ó", "o").replace("ó", "o")
-    string=string.replace("Ó", "O").replace("ż", "z").replace("Ż", "Z").replace("ź", "z")
-    string=string.replace("Ź", "Z").replace("ń", "n").replace("Ń", "N")    
-    #asciidata=string.encode("ascii","ignore")   
-    #print(asciidata)
-    return string
-
-		 
+			 
 def printDaysWithoutDie(daysWithoutDie, recorDaysWithoutDie ):
 	with canvas(device1) as draw:
 		text(draw, (0, 0), "%5d  %5d" % (daysWithoutDie, recorDaysWithoutDie), fill="white", font=proportional(LCD_FONT))
@@ -45,8 +34,7 @@ def printDateAndTime(dateTime):
 		text(draw, (0, 0), current_time, fill="white", font=proportional(LCD_FONT))	
 
 def printCustomMessage(message):
-    message = replacePolishCharacters(message)
-    show_message(device0, message, fill="white", font=proportional(LCD_FONT), scroll_delay=0.05)
+	show_message(device0, message, fill="white", font=proportional(LCD_FONT), scroll_delay=0.05)
 	
 
 def playBarka():
@@ -89,7 +77,6 @@ class LEDDisplay:
                 printCustomMessage("Pokolenie JP2")        
             elif self.newMessageFlag  == True:
                 self.newMessageFlag  = False
-                printCustomMessage(self.shown_text)
                 printCustomMessage(self.shown_text)
             else:
                 printDateAndTime(now)
