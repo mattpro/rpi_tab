@@ -112,7 +112,7 @@ class LEDDisplay:
                 self.newMessageFlag  = False
                 printCustomMessage(self.shown_text)
                 printCustomMessage(self.shown_text)
-            elif now.second == 30 or now.second == 0:
+            elif (now.second == 31) or (now.second == 1):
                 printTemperature()
             else:
                 printDateAndTime(now)
