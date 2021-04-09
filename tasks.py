@@ -98,12 +98,14 @@ class LEDDisplay:
         self.shown_text = new_text
         self.newMessageFlag = True
         
-    def threaded_rest(self,):
+    def threaded_rest(self):
+        temperature_log_time = datetime.now()
         while True:
             now = datetime.now()
             detltaT = now - conclusiveStart
             printDaysWithoutDie(detltaT.days, detltaT.days)
             time.sleep(0.5)
+            temperature_log_elapsed = (now - temperature_log_time)
                       
             if now.hour == 21 and now.minute == 37:
                 if self.playSound == False:
@@ -117,12 +119,14 @@ class LEDDisplay:
             elif (now.second == 30) or (now.second == 0):
                 printTemperature()
                 time.sleep(5)
-            elif (now.minute == 15) or (now.minute == 45):
-                logTemperatureToFile()
             else:
                 printDateAndTime(now)
 
             if now.hour == 10 and now.minute == 14:
                 self.playSound = False
-                
+
+            if temperature_log_elapsed.total_seconds() > 15 * 60:
+                # log temperature to file every 15 minutes
+                logTemperatureToFile()
+                temperature_log_time = datetime.now()
             time.sleep(0.5)
