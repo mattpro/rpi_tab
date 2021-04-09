@@ -71,16 +71,18 @@ def getTemperature():
         temperature = sensor.get_temperature()
     except w1thermsensor.NoSensorFoundError:
         temperature = 0.0
+    return temperature
 
+def logTemperatureToFile():
+    temperature = getTemperature()
     fields=[datetime.now(), temperature]
     with open(r'temperature_log.csv', 'a') as f:
         writer = csv.writer(f)
         writer.writerow(fields)
-    return temperature
 
 def printTemperature():
     temp = getTemperature()
-    temp_text = "Temp. {} °C".format(temp)
+    temp_text = "Temp. {} C".format(temp)
     with canvas(device0) as draw:
         text(draw, (0, 0), temp_text, fill="white", font=proportional(LCD_FONT))
 
@@ -112,9 +114,11 @@ class LEDDisplay:
                 self.newMessageFlag  = False
                 printCustomMessage(self.shown_text)
                 printCustomMessage(self.shown_text)
-            elif (now.second == 31) or (now.second == 1):
+            elif (now.second == 30) or (now.second == 0):
                 printTemperature()
-                time.sleep(2)
+                time.sleep(5)
+            elif (now.minute == 15) or (now.minute == 45):
+                logTemperatureToFile()
             else:
                 printDateAndTime(now)
 
