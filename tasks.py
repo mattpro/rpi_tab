@@ -82,7 +82,7 @@ def printTemperature():
     temp = getTemperature()
     temp_text = "Temp. {} °C".format(temp)
     with canvas(device0) as draw:
-        text(draw, (0, 0), temp_text, fill="white", font=proportional(LCD_FONT), scroll_delay=0.05)
+        text(draw, (0, 0), temp_text, fill="white", font=proportional(LCD_FONT))
 
 
 class LEDDisplay:
@@ -114,6 +114,7 @@ class LEDDisplay:
                 printCustomMessage(self.shown_text)
             elif (now.second == 31) or (now.second == 1):
                 printTemperature()
+                time.sleep(2)
             else:
                 printDateAndTime(now)
 
