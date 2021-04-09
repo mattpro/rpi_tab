@@ -8,6 +8,8 @@ from luma.core.legacy import text
 from luma.core.legacy.font import proportional, CP437_FONT, LCD_FONT, SEG7_FONT, SINCLAIR_FONT, TINY_FONT, UKR_FONT
 from luma.core.render import canvas
 import simpleaudio as sa
+import w1thermsensor
+import csv
 
 conclusiveStart = datetime(year = 2019, month = 5, day = 1, hour = 0, minute = 0, second = 0)
 
@@ -63,7 +65,24 @@ def playBarka2():
 	play_obj = wave_obj.play()
 	#play_obj.wait_done()
 
+def getTemperature():
+    sensor = w1thermsensor.W1ThermSensor()
+    try: 
+        temperature = sensor.get_temperature()
+    except w1thermsensor.NoSensorFoundError:
+        temperature = 0.0
 
+    fields=[datetime.now(), temperature]
+    with open(r'temperature_log.csv', 'a') as f:
+        writer = csv.writer(f)
+        writer.writerow(fields)
+    return temperature
+
+def printTemperature():
+    temp = getTemperature()
+    temp_text = "Temp. {} °C".format(temp)
+    with canvas(device0) as draw:
+        text(draw, (0, 0), temp_text, fill="white", font=proportional(LCD_FONT))
 
 
 class LEDDisplay:
@@ -93,6 +112,8 @@ class LEDDisplay:
                 self.newMessageFlag  = False
                 printCustomMessage(self.shown_text)
                 printCustomMessage(self.shown_text)
+            elif now.second == 30:
+                printTemperature();
             else:
                 printDateAndTime(now)
 
