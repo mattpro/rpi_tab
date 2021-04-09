@@ -82,7 +82,7 @@ def logTemperatureToFile():
 
 def printTemperature():
     temp = getTemperature()
-    temp_text = "Temp. {} C".format(temp)
+    temp_text = "Temp. {:.1f} C".format(temp)
     with canvas(device0) as draw:
         text(draw, (0, 0), temp_text, fill="white", font=proportional(LCD_FONT))
 
