@@ -11,50 +11,50 @@ import simpleaudio as sa
 import w1thermsensor
 import csv
 
-conclusiveStart = datetime(year = 2019, month = 5, day = 1, hour = 0, minute = 0, second = 0)
+conclusiveStart = datetime(year=2019, month=5, day=1, hour=0, minute=0, second=0)
 
-#Do SPI0 podłączony jest wyświetlacz z pływajacym tekstem + zegar
+# Do SPI0 podłączony jest wyświetlacz z pływajacym tekstem + zegar
 serial0 = spi(port=0, device=0, gpio=noop(), bus_speed_hz=500000)
-device0 = max7219(serial0, cascaded= 8, block_orientation=90,
-				 rotate=2, blocks_arranged_in_reverse_order=True)
+device0 = max7219(serial0, cascaded=8, block_orientation=90, rotate=2, blocks_arranged_in_reverse_order=True)
 device0.contrast(16)
 
-#Do SPI1 podłączony jest wyświetlacz z licznikiem zgonów i dni bez wypadku 
+# Do SPI1 podłączony jest wyświetlacz z licznikiem zgonów i dni bez wypadku
 serial1 = spi(port=0, device=1, gpio=noop(), bus_speed_hz=500000)
-device1 = max7219(serial1, cascaded= 8, block_orientation=90,
-				 rotate=2, blocks_arranged_in_reverse_order=True)
+device1 = max7219(serial1, cascaded=8, block_orientation=90, rotate=2, blocks_arranged_in_reverse_order=True)
 device1.contrast(16)
 
 
 def replacePolishCharacters(string):
-    string=string.replace("ł", "l").replace("Ł", "L").replace("ś", "s").replace("Ś", "S")
-    string=string.replace("ć", "c").replace("Ć", "C").replace("ą", "a").replace("Ą", "A")
-    string=string.replace("ę", "e").replace("Ę", "E").replace("ó", "o").replace("ó", "o")
-    string=string.replace("Ó", "O").replace("ż", "z").replace("Ż", "Z").replace("ź", "z")
-    string=string.replace("Ź", "Z").replace("ń", "n").replace("Ń", "N")    
-    #asciidata=string.encode("ascii","ignore")   
-    #print(asciidata)
+    string = string.replace("ł", "l").replace(
+        "Ł", "L").replace("ś", "s").replace("Ś", "S")
+    string = string.replace("ć", "c").replace(
+        "Ć", "C").replace("ą", "a").replace("Ą", "A")
+    string = string.replace("ę", "e").replace(
+        "Ę", "E").replace("ó", "o").replace("ó", "o")
+    string = string.replace("Ó", "O").replace(
+        "ż", "z").replace("Ż", "Z").replace("ź", "z")
+    string = string.replace("Ź", "Z").replace("ń", "n").replace("Ń", "N")
+    # asciidata=string.encode("ascii","ignore")
+    # print(asciidata)
     return string
 
-		 
-def printDaysWithoutDie(daysWithoutDie, recorDaysWithoutDie ):
+def printDaysWithoutDie(daysWithoutDie, recorDaysWithoutDie):
     device1.clear()
-	with canvas(device1) as draw:
-		text(draw, (0, 0), "%5d  %5d" % (daysWithoutDie, recorDaysWithoutDie), fill="white", font=proportional(LCD_FONT))
-
+    with canvas(device1) as draw:
+        text(draw, (0, 0), "%5d  %5d" % (daysWithoutDie, recorDaysWithoutDie), 
+        fill="white", font=proportional(LCD_FONT))
 
 def printDateAndTime(dateTime):
-	#current_time = now.strftime("%d.%m.%y  %H:%M:%S")
-	current_time = dateTime.strftime("    %H:%M:%S  ")
+    # current_time = now.strftime("%d.%m.%y  %H:%M:%S")
+    current_time = dateTime.strftime("    %H:%M:%S  ")
     device0.clear()
-	with canvas(device0) as draw:
-		text(draw, (0, 0), current_time, fill="white", font=proportional(LCD_FONT))	
+    with canvas(device0) as draw:
+        text(draw, (0, 0), current_time, fill="white", font=proportional(LCD_FONT))	
 
 def printCustomMessage(message):
     message = replacePolishCharacters(message)
     device0.clear()
     show_message(device0, message, fill="white", font=proportional(LCD_FONT), scroll_delay=0.05)
-	
 
 def playBarka():
     if pygame.mixer.music.get_busy() == False:
@@ -64,9 +64,9 @@ def playBarka():
         pygame.mixer.music.play()
 
 def playBarka2():	
-	wave_obj = sa.WaveObject.from_wave_file("barka.wav")
-	play_obj = wave_obj.play()
-	#play_obj.wait_done()
+    wave_obj = sa.WaveObject.from_wave_file("barka.wav")
+    play_obj = wave_obj.play()
+    # play_obj.wait_done()
 
 def getTemperature():
     sensor = w1thermsensor.W1ThermSensor()
@@ -89,7 +89,6 @@ def printTemperature():
     device0.clear()
     with canvas(device0) as draw:
         text(draw, (0, 0), temp_text, fill="white", font=proportional(LCD_FONT))
-
 
 class LEDDisplay:
     def __init__(self) -> None:
