@@ -40,6 +40,7 @@ def replacePolishCharacters(string):
 
 def printDaysWithoutDie(daysWithoutDie, recorDaysWithoutDie):
     with canvas(device1) as draw:
+        text(draw, (0, 0), "            ", fill="white", font=proportional(LCD_FONT))
         text(draw, (0, 0), "%5d  %5d" % (daysWithoutDie, recorDaysWithoutDie), 
         fill="white", font=proportional(LCD_FONT))
 
@@ -102,7 +103,6 @@ class LEDDisplay:
         while True:
             now = datetime.now()
             detltaT = now - conclusiveStart
-            device1.clear()
             printDaysWithoutDie(detltaT.days, detltaT.days)
             time.sleep(0.5)
             temperature_log_elapsed = (now - temperature_log_time)
