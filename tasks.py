@@ -19,7 +19,7 @@ device0 = max7219(serial0, cascaded=8, block_orientation=90, rotate=2, blocks_ar
 device0.contrast(16)
 
 # Do SPI1 podłączony jest wyświetlacz z licznikiem zgonów i dni bez wypadku
-serial1 = spi(port=0, device=1, gpio=noop(), bus_speed_hz=500000)
+serial1 = spi(port=0, device=1, gpio=noop(), bus_speed_hz=2000000)
 device1 = max7219(serial1, cascaded=8, block_orientation=90, rotate=2, blocks_arranged_in_reverse_order=True)
 device1.contrast(16)
 
