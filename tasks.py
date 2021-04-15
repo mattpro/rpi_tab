@@ -48,6 +48,7 @@ def printDateAndTime(dateTime):
     # current_time = now.strftime("%d.%m.%y  %H:%M:%S")
     current_time = dateTime.strftime("    %H:%M:%S  ")
     with canvas(device0) as draw:
+        text(draw, (0, 0), "            ", fill="white", font=proportional(LCD_FONT))
         text(draw, (0, 0), current_time, fill="white", font=proportional(LCD_FONT))	
 
 def printCustomMessage(message):
