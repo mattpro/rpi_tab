@@ -38,6 +38,7 @@ def replacePolishCharacters(string):
 
 		 
 def printDaysWithoutDie(daysWithoutDie, recorDaysWithoutDie ):
+    device1.clear()
 	with canvas(device1) as draw:
 		text(draw, (0, 0), "%5d  %5d" % (daysWithoutDie, recorDaysWithoutDie), fill="white", font=proportional(LCD_FONT))
 
@@ -45,11 +46,13 @@ def printDaysWithoutDie(daysWithoutDie, recorDaysWithoutDie ):
 def printDateAndTime(dateTime):
 	#current_time = now.strftime("%d.%m.%y  %H:%M:%S")
 	current_time = dateTime.strftime("    %H:%M:%S  ")
+    device0.clear()
 	with canvas(device0) as draw:
 		text(draw, (0, 0), current_time, fill="white", font=proportional(LCD_FONT))	
 
 def printCustomMessage(message):
     message = replacePolishCharacters(message)
+    device0.clear()
     show_message(device0, message, fill="white", font=proportional(LCD_FONT), scroll_delay=0.05)
 	
 
@@ -83,6 +86,7 @@ def logTemperatureToFile():
 def printTemperature():
     temp = getTemperature()
     temp_text = "Temp. {:.1f} C".format(temp)
+    device0.clear()
     with canvas(device0) as draw:
         text(draw, (0, 0), temp_text, fill="white", font=proportional(LCD_FONT))
 
