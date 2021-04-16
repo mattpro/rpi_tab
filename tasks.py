@@ -14,12 +14,12 @@ import csv
 conclusiveStart = datetime(year=2019, month=5, day=1, hour=0, minute=0, second=0)
 
 # Do SPI0 podłączony jest wyświetlacz z pływajacym tekstem + zegar
-serial0 = spi(port=0, device=0, gpio=noop(), bus_speed_hz=500000)
+serial0 = spi(port=0, device=0, gpio=noop(), bus_speed_hz=500000, transfer_size=64, reset_hold_time=0.15, reset_release_time=0.15)
 device0 = max7219(serial0, cascaded=8, block_orientation=90, rotate=2, blocks_arranged_in_reverse_order=True)
 device0.contrast(16)
 
 # Do SPI1 podłączony jest wyświetlacz z licznikiem zgonów i dni bez wypadku
-serial1 = spi(port=0, device=1, gpio=noop(), bus_speed_hz=2000000)
+serial1 = spi(port=0, device=1, gpio=noop(), bus_speed_hz=500000, transfer_size=64, reset_hold_time=0.15, reset_release_time=0.15)
 device1 = max7219(serial1, cascaded=8, block_orientation=90, rotate=2, blocks_arranged_in_reverse_order=True)
 device1.contrast(16)
 
