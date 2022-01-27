@@ -10,6 +10,9 @@ from luma.core.render import canvas
 import simpleaudio as sa
 import pyownet
 import csv
+from pyownet.protocol import OwnetTimeout
+from threading import Timer
+import time
 
 conclusiveStart = datetime(year=2019, month=5, day=1, hour=0, minute=0, second=0)
 
@@ -25,6 +28,11 @@ device1.contrast(208)
 
 owproxy = pyownet.protocol.proxy(host="localhost", port=4304)
 
+class RepeatTimer(Timer):
+    def run(self):
+        while not self.finished.wait(self.interval):
+            self.function(*self.args, **self.kwargs)
+
 def replacePolishCharacters(string):
     string = string.replace("ł", "l").replace(
         "Ł", "L").replace("ś", "s").replace("Ś", "S")
@@ -39,62 +47,66 @@ def replacePolishCharacters(string):
     # print(asciidata)
     return string
 
-def printDaysWithoutDie(daysWithoutDie, recorDaysWithoutDie):
-    with canvas(device1) as draw:
-        text(draw, (0, 0), "            ", fill="white", font=proportional(LCD_FONT))
-        text(draw, (0, 0), "%5d  %5d" % (daysWithoutDie, recorDaysWithoutDie), 
-        fill="white", font=proportional(LCD_FONT))
-
-def printDateAndTime(dateTime):
-    # current_time = now.strftime("%d.%m.%y  %H:%M:%S")
-    current_time = dateTime.strftime("    %H:%M:%S  ")
-    with canvas(device0) as draw:
-        text(draw, (0, 0), "            ", fill="white", font=proportional(LCD_FONT))
-        text(draw, (0, 0), current_time, fill="white", font=proportional(LCD_FONT))	
-
-def printCustomMessage(message):
-    message = replacePolishCharacters(message)
-    show_message(device0, message, fill="white", font=proportional(LCD_FONT), scroll_delay=0.05)
-
-# def playBarka():
-#     if pygame.mixer.music.get_busy() == False:
-#         pygame.mixer.init()
-#         pygame.mixer.music.load("barka.mp3")
-#         pygame.mixer.music.set_volume(1.0)
-#         pygame.mixer.music.play()
-
-def playBarka2():	
-    wave_obj = sa.WaveObject.from_wave_file("barka.wav")
-    play_obj = wave_obj.play()
-    # play_obj.wait_done()
-
-def getTemperature():
-    # sensors = owproxy.dir()
-    temperature = 0.0
-    temp_raw = owproxy.read('/28.126DC11E1901/temperature', timeout=1)
-    if temp_raw:
-        temperature = float(temp_raw.decode("utf-8").strip())
-    return temperature
-
-def logTemperatureToFile():
-    temperature = getTemperature()
-    fields=[datetime.now(), temperature]
-    with open(r'temperature_log.csv', 'a') as f:
-        writer = csv.writer(f)
-        writer.writerow(fields)
-
-def printTemperature():
-    temp = getTemperature()
-    temp_text = "Temp. {:.1f} C".format(temp)
-    with canvas(device0) as draw:
-        text(draw, (0, 0), temp_text, fill="white", font=proportional(LCD_FONT))
-
 class LEDDisplay:
     def __init__(self) -> None:
         super().__init__()
         self.shown_text = 'EMPTY'
         self.newMessageFlag = False
         self.playSound = False
+        self.last_temp = 0.0
+
+    def printDaysWithoutDie(self, daysWithoutDie, recorDaysWithoutDie):
+        with canvas(device1) as draw:
+            text(draw, (0, 0), "            ", fill="white", font=proportional(LCD_FONT))
+            text(draw, (0, 0), "%5d  %5d" % (daysWithoutDie, recorDaysWithoutDie), 
+            fill="white", font=proportional(LCD_FONT))
+
+    def printDateAndTime(self, dateTime):
+        # current_time = now.strftime("%d.%m.%y  %H:%M:%S")
+        current_time = dateTime.strftime("    %H:%M:%S  ")
+        with canvas(device0) as draw:
+            text(draw, (0, 0), "            ", fill="white", font=proportional(LCD_FONT))
+            text(draw, (0, 0), current_time, fill="white", font=proportional(LCD_FONT))	
+
+    def printCustomMessage(sellf, message):
+        message = replacePolishCharacters(message)
+        show_message(device0, message, fill="white", font=proportional(LCD_FONT), scroll_delay=0.05)
+
+    # def playBarka():
+    #     if pygame.mixer.music.get_busy() == False:
+    #         pygame.mixer.init()
+    #         pygame.mixer.music.load("barka.mp3")
+    #         pygame.mixer.music.set_volume(1.0)
+    #         pygame.mixer.music.play()
+
+    def playBarka2(self):	
+        wave_obj = sa.WaveObject.from_wave_file("barka.wav")
+        play_obj = wave_obj.play()
+        # play_obj.wait_done()
+
+    def getTemperature(self):
+        # sensors = owproxy.dir()
+        try:
+            print("READ TEMP0:" + str(datetime.now()))
+            temp_raw = owproxy.read('/28.126DC11E1901/temperature', timeout=1)
+            print("READ TEMP1: " + str(datetime.now()))
+            if temp_raw:
+                self.last_temp = float(temp_raw.decode("utf-8").strip())
+        except OwnetTimeout:
+            print("TIMEOUT!")
+
+    def logTemperatureToFile(self):
+        temperature = self.last_temp
+        fields=[datetime.now(), temperature]
+        with open(r'temperature_log.csv', 'a') as f:
+            writer = csv.writer(f)
+            writer.writerow(fields)
+
+    def printTemperature(self):
+        temp = self.last_temp
+        temp_text = "Temp. {:.1f} C".format(temp)
+        with canvas(device0) as draw:
+            text(draw, (0, 0), temp_text, fill="white", font=proportional(LCD_FONT))
 
     def tasks_change_text(self, new_text):
         self.shown_text = new_text
@@ -102,33 +114,42 @@ class LEDDisplay:
         
     def threaded_rest(self):
         temperature_log_time = datetime.now()
+        self.getTemperature()
         while True:
             now = datetime.now()
             detltaT = now - conclusiveStart
-            printDaysWithoutDie(detltaT.days, detltaT.days)
-            time.sleep(0.5)
+            self.printDaysWithoutDie(detltaT.days, detltaT.days)
+            # time.sleep(0.5)
             temperature_log_elapsed = (now - temperature_log_time)
                       
             if now.hour == 21 and now.minute == 37:
                 if self.playSound == False:
                     self.playSound = True
-                    playBarka2()
+                    self.playBarka2()
                 printCustomMessage("Pokolenie JP2")        
             elif self.newMessageFlag  == True:
                 self.newMessageFlag  = False
-                printCustomMessage(self.shown_text)
-                printCustomMessage(self.shown_text)
+                self.printCustomMessage(self.shown_text)
+                self.printCustomMessage(self.shown_text)
             elif (now.second == 30) or (now.second == 0):
-                printTemperature()
+                self.printTemperature()
                 time.sleep(5)
             else:
-                printDateAndTime(now)
+                self.printDateAndTime(now)
 
             if now.hour == 10 and now.minute == 14:
                 self.playSound = False
 
             if temperature_log_elapsed.total_seconds() > 15 * 60:
                 # log temperature to file every 15 minutes
-                logTemperatureToFile()
+                self.logTemperatureToFile()
                 temperature_log_time = datetime.now()
-            time.sleep(0.5)
+            time.sleep(1)
+            print(str(datetime.now()))
+
+if __name__ == "__main__":
+    ld = LEDDisplay()
+    temperatureTimer = RepeatTimer(30, ld.getTemperature)
+    temperatureTimer.start()
+    ld.threaded_rest()
+    temperatureTimer.cancel()
