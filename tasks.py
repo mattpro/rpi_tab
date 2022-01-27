@@ -1,5 +1,5 @@
 import time
-import pygame
+# import pygame
 from datetime import datetime
 from luma.led_matrix.device import max7219
 from luma.core.interface.serial import spi, noop
@@ -8,7 +8,7 @@ from luma.core.legacy import text
 from luma.core.legacy.font import proportional, CP437_FONT, LCD_FONT, SEG7_FONT, SINCLAIR_FONT, TINY_FONT, UKR_FONT
 from luma.core.render import canvas
 import simpleaudio as sa
-import w1thermsensor
+import pyownet
 import csv
 
 conclusiveStart = datetime(year=2019, month=5, day=1, hour=0, minute=0, second=0)
@@ -16,13 +16,14 @@ conclusiveStart = datetime(year=2019, month=5, day=1, hour=0, minute=0, second=0
 # Do SPI0 podłączony jest wyświetlacz z pływajacym tekstem + zegar
 serial0 = spi(port=0, device=0, gpio=noop(), bus_speed_hz=500000, transfer_size=64, reset_hold_time=0.15, reset_release_time=0.15)
 device0 = max7219(serial0, cascaded=8, block_orientation=90, rotate=2, blocks_arranged_in_reverse_order=True)
-device0.contrast(16)
+device0.contrast(208)
 
 # Do SPI1 podłączony jest wyświetlacz z licznikiem zgonów i dni bez wypadku
 serial1 = spi(port=0, device=1, gpio=noop(), bus_speed_hz=500000, transfer_size=64, reset_hold_time=0.15, reset_release_time=0.15)
 device1 = max7219(serial1, cascaded=8, block_orientation=90, rotate=2, blocks_arranged_in_reverse_order=True)
-device1.contrast(16)
+device1.contrast(208)
 
+owproxy = pyownet.protocol.proxy(host="localhost", port=4304)
 
 def replacePolishCharacters(string):
     string = string.replace("ł", "l").replace(
@@ -55,12 +56,12 @@ def printCustomMessage(message):
     message = replacePolishCharacters(message)
     show_message(device0, message, fill="white", font=proportional(LCD_FONT), scroll_delay=0.05)
 
-def playBarka():
-    if pygame.mixer.music.get_busy() == False:
-        pygame.mixer.init()
-        pygame.mixer.music.load("barka.mp3")
-        pygame.mixer.music.set_volume(1.0)
-        pygame.mixer.music.play()
+# def playBarka():
+#     if pygame.mixer.music.get_busy() == False:
+#         pygame.mixer.init()
+#         pygame.mixer.music.load("barka.mp3")
+#         pygame.mixer.music.set_volume(1.0)
+#         pygame.mixer.music.play()
 
 def playBarka2():	
     wave_obj = sa.WaveObject.from_wave_file("barka.wav")
@@ -68,11 +69,11 @@ def playBarka2():
     # play_obj.wait_done()
 
 def getTemperature():
-    sensor = w1thermsensor.W1ThermSensor()
-    try: 
-        temperature = sensor.get_temperature()
-    except w1thermsensor.NoSensorFoundError:
-        temperature = 0.0
+    # sensors = owproxy.dir()
+    temperature = 0.0
+    temp_raw = owproxy.read('/28.126DC11E1901/temperature', timeout=1)
+    if temp_raw:
+        temperature = float(temp_raw.decode("utf-8").strip())
     return temperature
 
 def logTemperatureToFile():
