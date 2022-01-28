@@ -13,6 +13,7 @@ import csv
 from pyownet.protocol import OwnetTimeout
 from threading import Timer
 import time
+import unicodedata
 
 conclusiveStart = datetime(year=2019, month=5, day=1, hour=0, minute=0, second=0)
 
@@ -33,19 +34,8 @@ class RepeatTimer(Timer):
         while not self.finished.wait(self.interval):
             self.function(*self.args, **self.kwargs)
 
-def replacePolishCharacters(string):
-    string = string.replace("ł", "l").replace(
-        "Ł", "L").replace("ś", "s").replace("Ś", "S")
-    string = string.replace("ć", "c").replace(
-        "Ć", "C").replace("ą", "a").replace("Ą", "A")
-    string = string.replace("ę", "e").replace(
-        "Ę", "E").replace("ó", "o").replace("ó", "o")
-    string = string.replace("Ó", "O").replace(
-        "ż", "z").replace("Ż", "Z").replace("ź", "z")
-    string = string.replace("Ź", "Z").replace("ń", "n").replace("Ń", "N")
-    # asciidata=string.encode("ascii","ignore")
-    # print(asciidata)
-    return string
+def strip_accents(text):
+    return ''.join(c for c in unicodedata.normalize('NFKD', text) if unicodedata.category(c) != 'Mn')
 
 class LEDDisplay:
     def __init__(self) -> None:
@@ -55,22 +45,35 @@ class LEDDisplay:
         self.playSound = False
         self.last_temp = 0.0
 
+    def getTemperature(self):
+        try:
+            temp_raw = owproxy.read('/28.126DC11E1901/temperature', timeout=1)
+            if temp_raw:
+                self.last_temp = float(temp_raw.decode("utf-8").strip())
+                print("TEMP OK:"+str(datetime.now())+str(self.last_temp))
+        except OwnetTimeout:
+            print("TIMEOUT!")
+
+    def logTemperatureToFile(self):
+        fields=[datetime.now(), self.last_temp]
+        with open(r'temperature_log.csv', 'a') as f:
+            writer = csv.writer(f)
+            writer.writerow(fields)
+
     def printDaysWithoutDie(self, daysWithoutDie, recorDaysWithoutDie):
         with canvas(device1) as draw:
-            text(draw, (0, 0), "            ", fill="white", font=proportional(LCD_FONT))
+            draw.rectangle([0, 0, device1.width, device1.height], fill="black")
             text(draw, (0, 0), "%5d  %5d" % (daysWithoutDie, recorDaysWithoutDie), 
             fill="white", font=proportional(LCD_FONT))
 
     def printDateAndTime(self, dateTime):
-        # current_time = now.strftime("%d.%m.%y  %H:%M:%S")
         current_time = dateTime.strftime("    %H:%M:%S  ")
         with canvas(device0) as draw:
-            text(draw, (0, 0), "            ", fill="white", font=proportional(LCD_FONT))
+            draw.rectangle([0, 0, device0.width, device0.height], fill="black")
             text(draw, (0, 0), current_time, fill="white", font=proportional(LCD_FONT))	
 
-    def printCustomMessage(sellf, message):
-        message = replacePolishCharacters(message)
-        show_message(device0, message, fill="white", font=proportional(LCD_FONT), scroll_delay=0.05)
+    def printCustomMessage(self, message):
+        show_message(device0, strip_accents(message), fill="white", font=proportional(LCD_FONT), scroll_delay=0.05)
 
     # def playBarka():
     #     if pygame.mixer.music.get_busy() == False:
@@ -84,28 +87,10 @@ class LEDDisplay:
         play_obj = wave_obj.play()
         # play_obj.wait_done()
 
-    def getTemperature(self):
-        # sensors = owproxy.dir()
-        try:
-            print("READ TEMP0:" + str(datetime.now()))
-            temp_raw = owproxy.read('/28.126DC11E1901/temperature', timeout=1)
-            print("READ TEMP1: " + str(datetime.now()))
-            if temp_raw:
-                self.last_temp = float(temp_raw.decode("utf-8").strip())
-        except OwnetTimeout:
-            print("TIMEOUT!")
-
-    def logTemperatureToFile(self):
-        temperature = self.last_temp
-        fields=[datetime.now(), temperature]
-        with open(r'temperature_log.csv', 'a') as f:
-            writer = csv.writer(f)
-            writer.writerow(fields)
-
     def printTemperature(self):
-        temp = self.last_temp
-        temp_text = "Temp. {:.1f} C".format(temp)
+        temp_text = "Temp. {:.1f} C".format(self.last_temp)
         with canvas(device0) as draw:
+            draw.rectangle([0, 0, device0.width, device0.height], fill="black")
             text(draw, (0, 0), temp_text, fill="white", font=proportional(LCD_FONT))
 
     def tasks_change_text(self, new_text):
@@ -113,20 +98,17 @@ class LEDDisplay:
         self.newMessageFlag = True
         
     def threaded_rest(self):
-        temperature_log_time = datetime.now()
         self.getTemperature()
         while True:
             now = datetime.now()
             detltaT = now - conclusiveStart
             self.printDaysWithoutDie(detltaT.days, detltaT.days)
-            # time.sleep(0.5)
-            temperature_log_elapsed = (now - temperature_log_time)
-                      
+                    
             if now.hour == 21 and now.minute == 37:
                 if self.playSound == False:
                     self.playSound = True
                     self.playBarka2()
-                printCustomMessage("Pokolenie JP2")        
+                self.printCustomMessage("Pokolenie JP2")
             elif self.newMessageFlag  == True:
                 self.newMessageFlag  = False
                 self.printCustomMessage(self.shown_text)
@@ -139,17 +121,13 @@ class LEDDisplay:
 
             if now.hour == 10 and now.minute == 14:
                 self.playSound = False
-
-            if temperature_log_elapsed.total_seconds() > 15 * 60:
-                # log temperature to file every 15 minutes
-                self.logTemperatureToFile()
-                temperature_log_time = datetime.now()
-            time.sleep(1)
-            print(str(datetime.now()))
+            time.sleep(0.1)
 
 if __name__ == "__main__":
     ld = LEDDisplay()
-    temperatureTimer = RepeatTimer(30, ld.getTemperature)
-    temperatureTimer.start()
+    backgroundThreads = [RepeatTimer(30, ld.getTemperature), RepeatTimer(900, ld.logTemperatureToFile)] 
+    for t in backgroundThreads:
+        t.start()
     ld.threaded_rest()
-    temperatureTimer.cancel()
+    for t in backgroundThreads:
+        t.cancel()
