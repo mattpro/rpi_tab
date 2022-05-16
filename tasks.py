@@ -81,10 +81,17 @@ class LEDDisplay:
             text(draw, (secondLineOffsetStart, 0), recordDaysWithoutDieText, fill="white", font=proportional(LCD_FONT))
 
     def printDateAndTime(self, dateTime):
-        current_time = dateTime.strftime("    %H:%M:%S  ")
+        currentTimeText = dateTime.strftime("%H:%M:%S")
+        # currentTimeTextWidth = textsize(currentTimeText, font=proportional(LCD_FONT))[0]
+        # currentTimeOffset = (device0.width - currentTimeTextWidth) // 2
+        #
+        # Offset calcluated manually, font isn't monospaced so the last character would
+        # jump each second if the text would be centered. This can be changed
+        # if the font would be changed in future. Calculated offset should be in
+        # range of 13-15 px.
         with canvas(device0) as draw:
             draw.rectangle([0, 0, device0.width, device0.height], fill="black")
-            text(draw, (0, 0), current_time, fill="white", font=proportional(LCD_FONT))	
+            text(draw, (13, 0), currentTimeText, fill="white", font=proportional(LCD_FONT))	
 
     def printCustomMessage(self, message):
         show_message(device0, strip_accents(message), fill="white", font=proportional(LCD_FONT), scroll_delay=0.05)
