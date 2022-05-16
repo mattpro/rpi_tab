@@ -4,7 +4,7 @@ from datetime import datetime
 from luma.led_matrix.device import max7219
 from luma.core.interface.serial import spi, noop
 from luma.core.legacy import show_message
-from luma.core.legacy import text
+from luma.core.legacy import text, textsize
 from luma.core.legacy.font import proportional, CP437_FONT, LCD_FONT, SEG7_FONT, SINCLAIR_FONT, TINY_FONT, UKR_FONT
 from luma.core.render import canvas
 import simpleaudio as sa
@@ -46,13 +46,17 @@ class LEDDisplay:
         self.last_temp = 0.0
 
     def getTemperature(self):
-        try:
-            temp_raw = owproxy.read('/28.126DC11E1901/temperature', timeout=1)
-            if temp_raw:
-                self.last_temp = float(temp_raw.decode("utf-8").strip())
-                print("TEMP OK:"+str(datetime.now())+str(self.last_temp))
-        except OwnetTimeout:
-            print("TIMEOUT!")
+        sensors = owproxy.dir()
+        if len(sensors) > 0:
+            try:
+                temp_raw = owproxy.read(sensors[0] + 'temperature', timeout=5)
+                if temp_raw:
+                    self.last_temp = float(temp_raw.decode("utf-8").strip())
+                    print("TEMP OK:"+str(datetime.now())+str(self.last_temp))
+            except OwnetTimeout:
+                print("TIMEOUT!")
+        else:
+            print("Temperature sensor not found!")
 
     def logTemperatureToFile(self):
         fields=[datetime.now(), self.last_temp]
@@ -63,8 +67,18 @@ class LEDDisplay:
     def printDaysWithoutDie(self, daysWithoutDie, recorDaysWithoutDie):
         with canvas(device1) as draw:
             draw.rectangle([0, 0, device1.width, device1.height], fill="black")
-            text(draw, (0, 0), "%5d  %5d" % (daysWithoutDie, recorDaysWithoutDie), 
-            fill="white", font=proportional(LCD_FONT))
+            singleRowWidth = device1.width // 2
+            daysWithoutDieText =  str(daysWithoutDie)
+            recordDaysWithoutDieText =  str(recorDaysWithoutDie)
+
+            daysWithouDieTextWidth = textsize(daysWithoutDieText, font=proportional(LCD_FONT))[0]
+            firstLineOffsetStart = (singleRowWidth - daysWithouDieTextWidth) // 2
+
+            recordDaysWithouDieTextWidth = textsize(recordDaysWithoutDieText, font=proportional(LCD_FONT))[0]
+            secondLineOffsetStart =  singleRowWidth + ((singleRowWidth - daysWithouDieTextWidth) // 2)
+
+            text(draw, (firstLineOffsetStart, 0), daysWithoutDieText, fill="white", font=proportional(LCD_FONT))
+            text(draw, (secondLineOffsetStart, 0), recordDaysWithoutDieText, fill="white", font=proportional(LCD_FONT))
 
     def printDateAndTime(self, dateTime):
         current_time = dateTime.strftime("    %H:%M:%S  ")
