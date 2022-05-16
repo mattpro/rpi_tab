@@ -10,9 +10,12 @@ from threading import Thread
 
 from tasks import LEDDisplay
 
+
 class MenuForm(FlaskForm):
-    todays_menu = StringField(u'Dziś w menu', [validators.required()], widget=TextArea())
+    todays_menu = StringField(
+        u'Dziś w menu', [validators.required()], widget=TextArea())
     submit_button = SubmitField(u'Wyślij na tablice')
+
 
 def create_app(configfile=None):
     default_menu = '^_^'
@@ -38,8 +41,8 @@ def create_app(configfile=None):
                 display.tasks_change_text(menu_text_saved)
         return render_template('index.html', form=form, menu=menu_text_saved)
 
-
     return app
 
+
 if __name__ == '__main__':
-    create_app().run(debug=False, host='0.0.0.0')
+    create_app().run(debug=True, host='0.0.0.0')
