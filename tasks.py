@@ -9,7 +9,6 @@ from luma.core.render import canvas
 import simpleaudio as sa
 import pyownet
 import csv
-from pyownet.protocol import OwnetTimeout
 from threading import Timer
 import time
 import unicodedata
@@ -54,16 +53,21 @@ class LEDDisplay:
 
     def getTemperature(self):
         sensors = owproxy.dir()
-        if len(sensors) > 0:
-            try:
-                temp_raw = owproxy.read(sensors[0] + 'temperature', timeout=5)
-                if temp_raw:
-                    self.last_temp = float(temp_raw.decode("utf-8").strip())
-                    print("TEMP OK:"+str(datetime.now())+str(self.last_temp))
-            except OwnetTimeout:
-                print("TIMEOUT!")
-        else:
+        if len(sensors) < 1:
             print("Temperature sensor not found!")
+            return -1
+        try:
+            temp_raw = owproxy.read(sensors[0] + 'temperature', timeout=5)
+            if temp_raw:
+                self.last_temp = float(temp_raw.decode("utf-8").strip())
+                print("TEMP OK:"+str(datetime.now())+str(self.last_temp))
+                return 0
+        except pyownet.protocol.OwnetTimeout as e:
+            print(f"Timeout error: {e.format_exc()}")
+            return -1
+        except pyownet.protocol.OwnetError as e:
+            print(f"Other pyownet error: {e.format_exc()}")
+            return -1
 
     def logTemperatureToFile(self):
         fields = [datetime.now(), self.last_temp]
@@ -162,8 +166,9 @@ class LEDDisplay:
 
 
 if __name__ == "__main__":
+    print("Starting tablica swietlna!")
     ld = LEDDisplay()
-    backgroundThreads = [RepeatTimer(30, ld.getTemperature), RepeatTimer(
+    backgroundThreads = [RepeatTimer(45, ld.getTemperature), RepeatTimer(
         900, ld.logTemperatureToFile)]
     for t in backgroundThreads:
         t.start()
